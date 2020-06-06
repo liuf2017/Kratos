@@ -238,6 +238,10 @@ void RansEvmKEpsilonVmsMonolithicWall<TDim, TNumNodes>::ApplyRansBasedWallLaw(
 
     const double eps = std::numeric_limits<double>::epsilon();
 
+    const array_1d<double, 3> wall_cell_center_velocity =
+            RansCalculationUtilities::CalculateWallVelocity(*this);
+        const double wall_cell_center_velocity_magnitude = norm_2(wall_cell_center_velocity);
+    double condition_u_tau = 0.0;
     for (size_t g = 0; g < number_of_gauss_points; ++g)
     {
         const Vector& gauss_shape_functions = row(shape_functions, g);
@@ -260,6 +264,8 @@ void RansEvmKEpsilonVmsMonolithicWall<TDim, TNumNodes>::ApplyRansBasedWallLaw(
                 c_mu_25 * std::sqrt(std::max(tke, 0.0)),
                 wall_velocity_magnitude / (inv_von_karman * std::log(y_plus) + beta));
             const double value = rho * std::pow(u_tau, 2) * weight / wall_velocity_magnitude;
+            
+            condition_u_tau += u_tau;
 
             for (size_t a = 0; a < r_geometry.PointsNumber(); ++a)
             {
@@ -275,7 +281,12 @@ void RansEvmKEpsilonVmsMonolithicWall<TDim, TNumNodes>::ApplyRansBasedWallLaw(
                 }
             }
         }
+    
+    
     }
+    condition_u_tau /= static_cast<double>(number_of_gauss_points);
+    this->SetValue(FRICTION_VELOCITY, condition_u_tau * wall_cell_center_velocity /
+                                                  wall_cell_center_velocity_magnitude);
 
     KRATOS_CATCH("");
 }

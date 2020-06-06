@@ -268,6 +268,7 @@ private:
     ///@name Static Member Variables
     ///@{
 
+
     ///@}
     ///@name Member Variables
     ///@{
@@ -275,7 +276,7 @@ private:
     ///@}
     ///@name Serialization
     ///@{
-
+    
     friend class Serializer;
 
     void save(Serializer& rSerializer) const override;
